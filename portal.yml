@@ -1,0 +1,107 @@
+# Needed when using zuul without eureka
+ribbon.eureka.enabled: false
+# services to reverse proxy
+zuul:
+  sensitiveHeaders: Cookie,Set-Cookie
+  routes:
+    refds.url: http://localhost:8083
+    inventory.url: http://localhost:8084
+    hoth.url: http://localhost:8082
+    iap.url: http://localhost:3000
+
+server.port: 8080
+
+logging.level.com.uken.platform: DEBUG
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/portal?serverTimezone=UTC
+    username: root
+    password: ""
+    test-while-idle: true
+    validationQuery: SELECT 1
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    test-on-borrow: true
+  jpa:
+    show-sql: false
+    hibernate: # https://docs.jboss.org/hibernate/orm/4.3/manual/en-US/html/ch03.html#configuration-optional
+      dialect: org.hibernate.dialect.MySQL5Dialect
+      format_sql: true
+      ddl-auto: update # TODO: we'll want to turn this off and do migrations manually once we're out of dev on force updates
+  cache:
+    cache-names: force_updates
+    caffeine.spec: maximumSize=256000,expireAfterAccess=600s
+
+uken:
+  app_name: portal
+  debug_auth: false
+  jwt:
+    secret_key: fake_secret
+    issuer: UKEN
+
+---
+
+spring:
+  profiles: test
+  datasource:
+    url: jdbc:h2:mem:portal:MODE=MySQL
+    driverClassName: org.h2.Driver
+    username: sa
+zuul.routes.test_route.url: http://localhost:8080
+
+---
+
+spring:
+  profiles: platform_staging
+  datasource:
+    url: jdbc:mysql://platform-staging-portal-aurora.uken.int:3306/portal?serverTimezone=UTC
+    username: app
+    password: 'qDwpxh54Ws4pf8fPgEjj'
+zuul.routes:
+  refds.url: http://platform-staging-refds.ecs.uken.int
+  inventory.url: http://platform-staging-inventory.ecs.uken.int
+  hoth.url: http://platform-staging-hoth.ecs.uken.int
+  iap.url: http://platform-staging-iap.ecs.uken.int
+uken:
+  debug_auth: true
+  jwt:
+    secret_key: '14875ytlahjkfdb923'
+    issuer: PLAT
+management.security.enabled: false
+
+---
+
+spring:
+  profiles: bingo_infinity_staging
+  datasource:
+    url: jdbc:mysql://bingo-infinity-staging-portal-aurora.uken.int:3306/portal?serverTimezone=UTC
+    username: app
+    password: 'QNO$LnVKZ(DWNs4AA.Gn'
+zuul.routes:
+  refds.url: http://bingo-infinity-staging-refds.ecs.uken.int
+  inventory.url: http://bingo-infinity-staging-inventory.ecs.uken.int
+  hoth.url: http://bingo-infinity-staging-hoth.ecs.uken.int
+  iap.url: http://bingo-infinity-staging-iap.ecs.uken.int
+uken:
+  debug_auth: true
+  jwt:
+    secret_key: 'VARVxGuwSy9802waxd'
+    issuer: BI_STG
+management.security.enabled: false
+
+---
+
+spring:
+  profiles: bingo_infinity_production
+  datasource:
+    url: jdbc:mysql://bingo-infinity-production-portal-aurora.uken.int:3306/portal?serverTimezone=UTC
+    username: app
+    password: '(b?i>s-oGOr?l]X]9.fr'
+zuul.routes:
+  refds.url: http://bingo-infinity-production-refds.ecs.uken.int
+  inventory.url: http://bingo-infinity-production-inventory.ecs.uken.int
+  hoth.url: http://bingo-infinity-production-hoth.ecs.uken.int
+  iap.url: http://bingo-infinity-production-iap.ecs.uken.int
+uken.jwt:
+  secret_key: 'VARVxGuwSy9802waxe'
+  issuer: BI_PRD
